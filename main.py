@@ -18,10 +18,10 @@ def connectivity_test():
             token = login_res.json()["accessToken"]
             return token
         else:
-            print(f"❌ Login failed {login_res.status_code}: {login_res.text}")
+            print(f"Login failed {login_res.status_code}: {login_res.text}")
             return None
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
         return None
 
 
@@ -31,10 +31,10 @@ def get_user_info(headers):
         if user_res.ok:
             return user_res.json()
         else:
-            print(f"❌ Failed to get users data: {user_res.text}")
+            print(f"Failed to get user's data: {user_res.text}")
             return None
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
         return None
 
 
@@ -44,10 +44,10 @@ def get_posts(headers, limit=60):
         if posts_res.ok:
             return posts_res.json()["posts"]
         else:
-            print(f"❌ Failed to get posts data: {posts_res.text}")
+            print(f"Failed to get posts data: {posts_res.text}")
             return None
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
         return None
 
 
@@ -65,11 +65,11 @@ def get_posts_with_comments(headers, posts):
                 comments = comments_res.json().get("comments", [])
             else:
                 print(
-                    f"❌ Failed to fetch comments for post {post_id}: {comments_res.status_code} - {comments_res.text}"
+                    f"Failed to fetch comments for post {post_id}: {comments_res.text}"
                 )
                 comments = []  # incase it failed put empty array
         except requests.RequestException as e:
-            print(f"❌ Error fetching comments for post {post_id}: {e}")
+            print(f"Error fetching comments for post {post_id}: {e}")
             comments = []
 
         post["comments"] = comments
@@ -87,12 +87,10 @@ def fetch_comments(post, headers):
         if res.status_code == 200:
             post["comments"] = res.json().get("comments", [])
         else:
-            print(
-                f"❌ Failed to fetch comments for post {post_id}: {res.status_code} - {res.text}"
-            )
+            print(f"Failed to fetch comments for post {post_id}: {res.text}")
             post["comments"] = []
     except requests.RequestException as e:
-        print(f"❌ Error fetching comments for post {post_id}: {e}")
+        print(f"Error fetching comments for post {post_id}: {e}")
         post["comments"] = []
     return post
 
@@ -113,32 +111,32 @@ def get_posts_with_comments_faster(headers, posts):
 def main():
     token = connectivity_test()
     if not token:
-        print("❌ Failed to get user token...")
+        print("Failed to get user token...")
         return
     headers = {"Authorization": f"Bearer {token}"}
 
     user_res = get_user_info(headers)
     if user_res:
-        print("\n✅ E1: Authenticated User")
+        print("\n E1: Authenticated User")
         print(user_res)
         print()
 
     posts = get_posts(headers)
     if not posts:
-        print("❌ Failed to get posts...")
+        print("Failed to get posts...")
         return
     else:
-        print("\n✅ E2: 60 Posts")
+        print("\n E2: 60 Posts")
         print(posts)
 
-    print("\n✅ E3: 60 Posts with Comments")
+    # Note: the original version is pretty slow, so i created 2 versions. one of them uses threads in order to speed
+    # up the process
+    print("\n E3: 60 Posts with Comments")
     posts_with_comments = []
 
     # posts_with_comments = get_posts_with_comments(headers, posts)
     # print(posts_with_comments)
 
-    # Note: the original version it pretty slow, so i created 2 versions. one of them uses threads in order to speed
-    # up the process
     posts_with_comments = get_posts_with_comments_faster(headers, posts)
     print(posts_with_comments)
 
